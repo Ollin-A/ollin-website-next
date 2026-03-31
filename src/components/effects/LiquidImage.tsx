@@ -1,0 +1,411 @@
+"use client";
+
+import React, { useEffect, useRef } from "react";
+
+function LiquidImage({
+  src,
+  alt,
+  className = "",
+  overscan = 22,
+}: {
+  key?: React.Key;
+  src: string;
+  alt?: string;
+  className?: string;
+  overscan?: number;
+}) {
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const glRef = useRef<WebGLRenderingContext | null>(null);
+  const programRef = useRef<WebGLProgram | null>(null);
+  const texRef = useRef<WebGLTexture | null>(null);
+
+  const rafRef = useRef<number | null>(null);
+  const runningRef = useRef(false);
+
+  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const lastMoveTRef = useRef<number>(0);
+
+  const pointerRef = useRef<{ x: number; y: number }>({ x: 0.5, y: 0.5 });
+  const velocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const strengthRef = useRef<number>(0);
+
+  const uniRef = useRef<{
+    uTime?: WebGLUniformLocation | null;
+    uPointer?: WebGLUniformLocation | null;
+    uVelocity?: WebGLUniformLocation | null;
+    uStrength?: WebGLUniformLocation | null;
+    uPad?: WebGLUniformLocation | null;
+    uTex?: WebGLUniformLocation | null;
+  }>({});
+
+  const startTimeRef = useRef<number>(performance.now());
+  const sizeRef = useRef<{ w: number; h: number; pad: number }>({
+    w: 0,
+    h: 0,
+    pad: overscan,
+  });
+
+  const compileShader = (
+    gl: WebGLRenderingContext,
+    type: number,
+    source: string,
+  ) => {
+    const sh = gl.createShader(type);
+    if (!sh) return null;
+    gl.shaderSource(sh, source);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
+    }
+    return sh;
+  };
+
+  const createProgram = (
+    gl: WebGLRenderingContext,
+    vsSource: string,
+    fsSource: string,
+  ) => {
+    const vs = compileShader(gl, gl.VERTEX_SHADER, vsSource);
+    const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSource);
+    if (!vs || !fs) return null;
+
+    const prog = gl.createProgram();
+    if (!prog) return null;
+
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+
+    gl.deleteShader(vs);
+    gl.deleteShader(fs);
+
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(prog));
+      gl.deleteProgram(prog);
+      return null;
+    }
+    return prog;
+  };
+
+  const createTextureFromImage = (
+    gl: WebGLRenderingContext,
+    img: HTMLImageElement,
+  ) => {
+    const tex = gl.createTexture();
+    if (!tex) return null;
+
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      img,
+    );
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return tex;
+  };
+
+  const setCanvasSize = () => {
+    const host = hostRef.current;
+    const canvas = canvasRef.current;
+    const gl = glRef.current;
+    if (!host || !canvas || !gl) return;
+
+    const rect = host.getBoundingClientRect();
+    const pad = sizeRef.current.pad;
+
+    const wCSS = Math.max(1, rect.width);
+    const hCSS = Math.max(1, rect.height);
+
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.round((wCSS + pad * 2) * dpr);
+    const h = Math.round((hCSS + pad * 2) * dpr);
+
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+
+    sizeRef.current = { w: wCSS, h: hCSS, pad };
+  };
+
+  const render = (tNow: number) => {
+    const gl = glRef.current;
+    const prog = programRef.current;
+    const tex = texRef.current;
+    if (!gl || !prog || !tex) return;
+
+    const { w, h, pad } = sizeRef.current;
+
+    const dt = Math.min(0.05, (tNow - lastMoveTRef.current) / 1000);
+    const s = strengthRef.current;
+    const decay = Math.pow(0.12, dt);
+    strengthRef.current = s * decay;
+
+    if (strengthRef.current < 0.002) {
+      strengthRef.current = 0;
+      runningRef.current = false;
+    }
+
+    const time = (tNow - startTimeRef.current) / 1000;
+
+    gl.useProgram(prog);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniform1i(uniRef.current.uTex!, 0);
+
+    gl.uniform1f(uniRef.current.uTime!, time);
+
+    gl.uniform2f(
+      uniRef.current.uPointer!,
+      pointerRef.current.x,
+      pointerRef.current.y,
+    );
+    gl.uniform2f(
+      uniRef.current.uVelocity!,
+      velocityRef.current.x,
+      velocityRef.current.y,
+    );
+    gl.uniform1f(uniRef.current.uStrength!, strengthRef.current);
+
+    const padNormX = pad / (w + pad * 2);
+    const padNormY = pad / (h + pad * 2);
+    gl.uniform2f(uniRef.current.uPad!, padNormX, padNormY);
+
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    if (runningRef.current) {
+      rafRef.current = requestAnimationFrame(render);
+    }
+  };
+
+  const kick = () => {
+    if (runningRef.current) return;
+    runningRef.current = true;
+    rafRef.current = requestAnimationFrame(render);
+  };
+
+  useEffect(() => {
+    const host = hostRef.current;
+    const canvas = canvasRef.current;
+    if (!host || !canvas) return;
+
+    const gl = canvas.getContext("webgl", {
+      alpha: true,
+      premultipliedAlpha: false,
+      antialias: true,
+      preserveDrawingBuffer: false,
+    });
+
+    if (!gl) return;
+
+    glRef.current = gl;
+
+    const vs = `
+      attribute vec2 aPos;
+      varying vec2 vUv;
+      void main() {
+        vUv = (aPos + 1.0) * 0.5;
+        gl_Position = vec4(aPos, 0.0, 1.0);
+      }
+    `;
+
+    const fs = `
+      precision mediump float;
+      varying vec2 vUv;
+
+      uniform sampler2D uTex;
+      uniform float uTime;
+      uniform vec2 uPointer;
+      uniform vec2 uVelocity;
+      uniform float uStrength;
+      uniform vec2 uPad;
+
+      float inside01(vec2 uv) {
+        return step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+      }
+
+      void main() {
+        vec2 uv = (vUv - uPad) / (1.0 - 2.0 * uPad);
+
+        float baseMask = inside01(uv);
+        if (baseMask < 0.5) {
+          gl_FragColor = vec4(0.0);
+          return;
+        }
+
+        vec2 p = uv - uPointer;
+        float d = length(p);
+
+        float ripple = sin(d * 26.0 - uTime * 10.0);
+        float falloff = exp(-d * 7.0);
+
+        vec2 dir = normalize(p + vec2(1e-4));
+        vec2 disp = dir * ripple * falloff * uStrength * 0.028;
+        disp += uVelocity * falloff * uStrength * 0.055;
+
+        vec2 uv2 = uv + disp;
+
+        float mask = inside01(uv2);
+
+        vec4 col = texture2D(uTex, clamp(uv2, 0.0, 1.0));
+        col.a *= mask;
+
+        gl_FragColor = col;
+      }
+    `;
+
+    const prog = createProgram(gl, vs, fs);
+    if (!prog) return;
+
+    programRef.current = prog;
+
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    const verts = new Float32Array([
+      -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
+    ]);
+    gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+
+    const aPos = gl.getAttribLocation(prog, "aPos");
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    uniRef.current.uTex = gl.getUniformLocation(prog, "uTex");
+    uniRef.current.uTime = gl.getUniformLocation(prog, "uTime");
+    uniRef.current.uPointer = gl.getUniformLocation(prog, "uPointer");
+    uniRef.current.uVelocity = gl.getUniformLocation(prog, "uVelocity");
+    uniRef.current.uStrength = gl.getUniformLocation(prog, "uStrength");
+    uniRef.current.uPad = gl.getUniformLocation(prog, "uPad");
+
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = src;
+
+    img.onload = () => {
+      if (cancelled) return;
+      const tex = createTextureFromImage(gl, img);
+      if (!tex) return;
+      texRef.current = tex;
+
+      setCanvasSize();
+
+      lastMoveTRef.current = performance.now();
+      strengthRef.current = 0;
+      runningRef.current = false;
+      render(performance.now());
+    };
+
+    const ro = new ResizeObserver(() => {
+      setCanvasSize();
+      lastMoveTRef.current = performance.now();
+      strengthRef.current = 0;
+      runningRef.current = false;
+      render(performance.now());
+    });
+    ro.observe(host);
+
+    const onMove = (e: PointerEvent) => {
+      const rect = host.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / Math.max(1, rect.width);
+      const yDom = (e.clientY - rect.top) / Math.max(1, rect.height);
+
+      const nx = Math.min(1, Math.max(0, x));
+      const nyDom = Math.min(1, Math.max(0, yDom));
+
+      const ny = 1 - nyDom;
+
+      const prev = lastPosRef.current;
+      if (prev) {
+        const vx = nx - prev.x;
+        const vy = ny - prev.y;
+        velocityRef.current.x = velocityRef.current.x * 0.65 + vx * 0.35;
+        velocityRef.current.y = velocityRef.current.y * 0.65 + vy * 0.35;
+      }
+
+      lastPosRef.current = { x: nx, y: ny };
+      pointerRef.current = { x: nx, y: ny };
+
+      strengthRef.current = 1.0;
+      lastMoveTRef.current = performance.now();
+      kick();
+    };
+
+    const onLeave = () => {
+      lastPosRef.current = null;
+      velocityRef.current = { x: 0, y: 0 };
+    };
+
+    host.addEventListener("pointermove", onMove);
+    host.addEventListener("pointerleave", onLeave);
+
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+      host.removeEventListener("pointermove", onMove);
+      host.removeEventListener("pointerleave", onLeave);
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+      const g = glRef.current;
+      if (g) {
+        if (texRef.current) g.deleteTexture(texRef.current);
+        if (programRef.current) g.deleteProgram(programRef.current);
+      }
+      glRef.current = null;
+      programRef.current = null;
+      texRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
+  return (
+    <div ref={hostRef} className={["relative", className].join(" ")}>
+      <canvas
+        ref={canvasRef}
+        className="absolute"
+        style={{
+          inset: `-${overscan}px`,
+          width: `calc(100% + ${overscan * 2}px)`,
+          height: `calc(100% + ${overscan * 2}px)`,
+          display: "block",
+          pointerEvents: "none",
+        }}
+        aria-hidden
+      />
+      <img
+        src={src}
+        alt={alt || ""}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover opacity-0"
+      />
+    </div>
+  );
+}
+
+export default LiquidImage;

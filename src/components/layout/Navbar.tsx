@@ -1,0 +1,234 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useLeadModal } from "@/components/lead/LeadModalProvider";
+
+const navLinks = [
+  { name: "Services", path: "/services" },
+  { name: "Blog", path: "/blog" },
+  { name: "Packages", path: "/packages" },
+];
+
+const Navbar: React.FC = () => {
+  const pathname = usePathname();
+  const isDark = pathname === "/chat";
+
+  const [isVisible, setIsVisible] = useState(true);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isServicesPinned, setIsServicesPinned] = useState(false);
+
+  const { openModal } = useLeadModal();
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const init = () => {
+      const pinned =
+        document.documentElement.getAttribute("data-services-pinned") === "true";
+      setIsServicesPinned(pinned);
+    };
+
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ pinned?: boolean }>;
+      const pinned = !!ce.detail?.pinned;
+      setIsServicesPinned(pinned);
+
+      if (pinned) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    init();
+    window.addEventListener("services:pinned", handler as EventListener);
+
+    return () => {
+      window.removeEventListener("services:pinned", handler as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 40) {
+        setIsVisible(true);
+      } else {
+        if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+          setIsVisible(false);
+        } else if (currentScrollY < lastScrollY.current) {
+          setIsVisible(true);
+        }
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isMobileOpen]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMobileOpen) {
+        setIsMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isMobileOpen]);
+
+  const handleOpenModal = () => {
+    setIsMobileOpen(false);
+    openModal();
+  };
+
+  const navTextStyle: React.CSSProperties = {
+    color: isDark ? "#ffffff" : "#000000",
+  };
+
+  const navHoverClass = "hover:opacity-80 transition-opacity duration-300";
+
+  const forceHide = isServicesPinned;
+
+  return (
+    <>
+      <header
+        className="fixed left-0 w-full z-50 transition-[top,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          top: forceHide ? "-6rem" : isVisible ? "0" : "-6rem",
+          opacity: forceHide ? 0 : 1,
+          pointerEvents: forceHide ? "none" : "auto",
+          backgroundColor: "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          border: "none",
+          boxShadow: "none",
+        } as React.CSSProperties}
+      >
+        <div
+          className="w-full max-w-[1500px] mx-auto px-[5vw] h-16 md:h-16 grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center"
+          style={navTextStyle}
+        >
+          <div className="flex justify-start">
+            <Link
+              href="/"
+              className={`font-montserrat font-semibold text-lg md:text-xl tracking-tight focus:outline-none text-current ${navHoverClass}`}
+              aria-label="OLLIN Home"
+            >
+              OLLIN
+            </Link>
+          </div>
+
+          <nav className="hidden md:flex justify-center items-center gap-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.path}
+                className={`text-[13px] font-medium tracking-[0.15em] uppercase relative group text-current ${navHoverClass}`}
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-current transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex justify-end items-center">
+            <div className="hidden md:flex items-center gap-6">
+              <Link
+                href="/chat"
+                className={`text-[13px] font-medium tracking-[0.15em] uppercase text-current ${navHoverClass}`}
+              >
+                AI
+              </Link>
+
+              <Link
+                href="/contact"
+                className={`text-[13px] font-medium tracking-[0.15em] uppercase text-current ${navHoverClass}`}
+              >
+                Contact
+              </Link>
+
+              <button
+                onClick={handleOpenModal}
+                className={`${isDark ? "bg-white text-ollin-black hover:bg-white/90" : "bg-ollin-black text-white"} text-[13px] font-medium tracking-wide px-5 py-2.5 rounded-[12px] hover:-translate-y-px hover:shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.33,1,0.68,1)]`}
+              >
+                Get a Free Growth Plan
+              </button>
+            </div>
+
+            <button
+              className="md:hidden p-2 -mr-2 focus:outline-none text-current"
+              onClick={() => setIsMobileOpen(!isMobileOpen)}
+              aria-label="Toggle Menu"
+            >
+              <div className="w-6 flex flex-col items-end gap-[5px]">
+                <span
+                  className={`h-[2px] bg-current w-6 transition-transform duration-300 ${isMobileOpen ? "rotate-45 translate-y-[7px]" : ""}`}
+                />
+                <span
+                  className={`h-[2px] bg-current w-4 transition-opacity duration-300 ${isMobileOpen ? "opacity-0" : ""}`}
+                />
+                <span
+                  className={`h-[2px] bg-current w-6 transition-transform duration-300 ${isMobileOpen ? "-rotate-45 -translate-y-[7px]" : ""}`}
+                />
+              </div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div
+        className={`fixed inset-0 ${isDark ? "bg-ollin-black text-white" : "bg-ollin-bg text-ollin-black"} z-40 flex flex-col justify-center items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isMobileOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}
+      >
+        <div className="flex flex-col items-center gap-8 text-center">
+          {navLinks.map((link, idx) => (
+            <Link
+              key={link.name}
+              href={link.path}
+              onClick={() => setIsMobileOpen(false)}
+              className={`text-3xl font-light tracking-tight transition-all duration-500 delay-[${idx * 50}ms] ${isMobileOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+            >
+              {link.name}
+            </Link>
+          ))}
+          <Link
+            href="/chat"
+            onClick={() => setIsMobileOpen(false)}
+            className={`text-3xl font-light tracking-tight transition-all duration-500 delay-100 ${isMobileOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+          >
+            Ask AI
+          </Link>
+          <Link
+            href="/contact"
+            onClick={() => setIsMobileOpen(false)}
+            className={`text-3xl font-light tracking-tight transition-all duration-500 delay-150 ${isMobileOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+          >
+            Contact
+          </Link>
+
+          <div
+            className={`mt-8 transition-all duration-500 delay-200 ${isMobileOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+          >
+            <button
+              onClick={handleOpenModal}
+              className={`${isDark ? "bg-white text-ollin-black hover:bg-white/90" : "bg-ollin-black text-white"} text-base font-medium px-8 py-4 rounded-[12px] w-full max-w-xs`}
+            >
+              Get a Free Growth Plan
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Navbar;

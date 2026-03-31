@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+interface SecondaryButtonProps {
+  label: string;
+  dataText?: string;
+  onClick?: () => void;
+  href?: string;
+  className?: string;
+  compact?: boolean;
+  variant?: "sm" | "details";
+  style?: React.CSSProperties;
+  ariaHidden?: boolean;
+}
+
+const arrowContent = (
+  <span className="btnSecondary14Arrow" aria-hidden="true">
+    <svg className="btnSecondary14ArrowLineSvg" viewBox="0 0 100 16" fill="none">
+      <line
+        x1="0"
+        y1="8"
+        x2="100"
+        y2="8"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="butt"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+    <svg
+      className="btnSecondary14ArrowHeadSvg"
+      viewBox="0 0 18 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M0 3 L12 8 L0 13" vectorEffect="non-scaling-stroke" />
+    </svg>
+  </span>
+);
+
+const SecondaryButton: React.FC<SecondaryButtonProps> = ({
+  label,
+  dataText,
+  onClick,
+  href,
+  className,
+  compact,
+  variant,
+  style,
+  ariaHidden,
+}) => {
+  const variantClass = variant
+    ? `btnSecondary14--${variant}`
+    : compact
+      ? "btnSecondary14--sm"
+      : "";
+
+  const classes = cn("btnSecondary btnSecondary14", variantClass, className);
+
+  const content = (
+    <>
+      <span className="btnSecondary14Text" data-text={dataText ?? label}>
+        {label}
+      </span>
+      {arrowContent}
+    </>
+  );
+
+  if (href) {
+    const isExternal =
+      href.startsWith("http") || href.startsWith("mailto:");
+
+    if (isExternal) {
+      return (
+        <a href={href} className={classes} style={style}>
+          {content}
+        </a>
+      );
+    }
+
+    return (
+      <Link href={href} className={classes} style={style}>
+        {content}
+      </Link>
+    );
+  }
+
+  if (ariaHidden) {
+    return (
+      <div className={classes} style={style} aria-hidden="true">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={classes} style={style}>
+      {content}
+    </button>
+  );
+};
+
+export default SecondaryButton;

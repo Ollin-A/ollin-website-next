@@ -1,0 +1,505 @@
+'use client';
+
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import {
+    Chip, SectionTitle, Divider, Card, Label,
+    BulletList,
+} from "@/components/services/shared";
+
+const ctaText = "Get the Audit";
+
+export default function AuditContent() {
+    const prefersReducedMotion = usePrefersReducedMotion();
+
+    return (
+        <main className={cn("w-full", "max-md:overflow-x-hidden")}>
+
+            <style>{`
+        @media (max-height: 520px){
+          .auditHero{
+            padding-top: 88px !important;
+            padding-bottom: 40px !important;
+          }
+          .auditHeroTitle{
+            font-size: clamp(50px, 8vw, 108px) !important;
+          }
+          .auditHeroSub{
+            margin-top: 14px !important;
+          }
+          .auditHeroChips{
+            margin-top: 18px !important;
+          }
+          .auditHeroTiles{
+            margin-top: 18px !important;
+          }
+        }
+
+        @media (max-width: 767px){
+          .auditSafeX *{
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+        }
+
+        a[data-ollin-cta14="services-audit"]{
+          --arrowLen: 18px;
+          --arrowLenHover: 46px;
+          --arrowOverlap: 7.5px;
+          transition: color 280ms ease-out, opacity 280ms ease-out;
+        }
+        a[data-ollin-cta14="services-audit"]:hover{ --arrowLen: var(--arrowLenHover); }
+
+        .auditCta14Text{ position: relative; line-height: 1; display: inline-block; }
+        .auditCta14Text::after{
+          content: attr(data-text);
+          position: absolute; inset: 0;
+          color: transparent;
+          background-image: linear-gradient(90deg, transparent 0%, rgba(255, 248, 220, 0.92) 45%, transparent 62%);
+          background-size: 220% 100%;
+          background-position: 220% 0;
+          -webkit-background-clip: text;
+          background-clip: text;
+          opacity: 0;
+          pointer-events: none;
+        }
+        @keyframes ollinSheenOnceLR_Audit14{
+          0%{ background-position: 220% 0; opacity: 0; }
+          12%{ opacity: 0.70; }
+          88%{ opacity: 0.70; }
+          100%{ background-position: -220% 0; opacity: 0; }
+        }
+        a[data-ollin-cta14="services-audit"]:hover .auditCta14Text::after{
+          animation: ollinSheenOnceLR_Audit14 720ms ease-out 1;
+        }
+
+        .auditCta14Arrow{
+          position: relative; display: inline-block;
+          width: 68px; height: 12px; margin-left: 8px;
+          pointer-events: none; vertical-align: baseline;
+        }
+        .auditCta14ArrowLineSvg{
+          position: absolute; left: 0; top: 50%;
+          transform: translateY(-50%);
+          width: var(--arrowLen); height: 12px;
+          overflow: visible;
+          transition: width 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
+          will-change: width;
+        }
+        .auditCta14ArrowHeadSvg{
+          position: absolute; left: 0; top: 50%;
+          width: 13px; height: 12px;
+          transform: translate3d(calc(var(--arrowLen) - var(--arrowOverlap)), -50%, 0);
+          transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
+          will-change: transform;
+        }
+
+        @media (prefers-reduced-motion: reduce){
+          a[data-ollin-cta14="services-audit"]{ transition: none !important; }
+          .auditCta14ArrowLineSvg, .auditCta14ArrowHeadSvg{ transition: none !important; }
+          a[data-ollin-cta14="services-audit"]:hover .auditCta14Text::after{ animation: none !important; }
+        }
+
+        @media (hover: none) and (pointer: coarse){
+          a[data-ollin-cta14="services-audit"]{ --arrowLen: 32px; }
+          a[data-ollin-cta14="services-audit"]:active{ --arrowLen: var(--arrowLenHover); }
+          a[data-ollin-cta14="services-audit"]:active .auditCta14Text::after{
+            animation: ollinSheenOnceLR_Audit14 720ms ease-out 1;
+          }
+        }
+      `}</style>
+
+            <section className="auditSafeX auditHero w-full max-w-[1500px] mx-auto px-[5vw] pt-28 md:pt-32 pb-10 md:pb-14">
+                <Link
+                    href="/services"
+                    className="inline-flex items-center text-[12px] md:text-[13px] tracking-[0.14em] uppercase text-ollin-black/55 hover:text-ollin-black transition-colors max-md:py-2"
+                >
+                    ← Back to Services
+                </Link>
+
+                <div className="mt-10 md:mt-12 max-md:mt-9">
+                    <p className="text-[11px] md:text-[12px] tracking-[0.28em] uppercase text-ollin-black/45 mb-4 max-md:mb-5">
+                        360° REVENUE LEAK AUDIT
+                    </p>
+
+                    <h1 className="auditHeroTitle font-[Montserrat] font-normal tracking-tight leading-[0.85] text-[clamp(44px,12.6vw,92px)] md:text-[clamp(64px,9vw,140px)]">
+                        AUDIT
+                    </h1>
+
+                    <p className="auditHeroSub mt-6 text-[18px] md:text-[22px] font-medium text-ollin-black/85 max-w-[60ch] max-md:mt-5 max-md:max-w-[32ch] leading-snug">
+                        Find what&apos;s leaking revenue—then fix the order of operations.
+                    </p>
+
+                    <div className="hidden md:block mt-4 space-y-3 max-w-[82ch]">
+                        <p className="text-[15px] md:text-[17px] leading-relaxed text-ollin-black/70">
+                            Most contractors don&apos;t have a &ldquo;marketing problem.&rdquo; They have an{" "}
+                            <span className="text-ollin-black/90">order</span> problem: tracking is missing, follow-ups are slow,
+                            pages don&apos;t match intent, and spend gets blamed when the pipeline is leaking downstream.
+                        </p>
+                        <p className="text-[15px] md:text-[17px] leading-relaxed text-ollin-black/70">
+                            This audit gives you a clear diagnosis, a prioritized action plan, and the fastest path to more booked
+                            calls—without guessing or rebuilding everything at once.
+                        </p>
+                    </div>
+
+                    <div className="md:hidden mt-4 space-y-3 max-w-[48ch]">
+                        <p className="text-[14px] leading-relaxed text-ollin-black/70 break-words hyphens-auto" style={{ overflowWrap: "anywhere" }}>
+                            This isn&apos;t &ldquo;do more marketing.&rdquo; We find the leak in your pipeline.
+                        </p>
+                        <p className="text-[14px] leading-relaxed text-ollin-black/70 break-words hyphens-auto" style={{ overflowWrap: "anywhere" }}>
+                            You get a prioritized fix list—so you stop wasting time and spend.
+                        </p>
+                    </div>
+
+                    <div className="auditHeroChips mt-8 flex flex-wrap items-center gap-3 max-md:mt-7">
+                        <Chip href="#review">What we review</Chip>
+                        <Chip href="#deliver">What you get</Chip>
+                        <Chip href="#leakmap">Leak map</Chip>
+                        <Chip href="#options">Implementation</Chip>
+                    </div>
+
+                    <div className="mt-8 max-md:mt-7">
+                        <Link
+                            href="/contact"
+                            data-ollin-cta14="services-audit"
+                            className={cn("inline-block text-sm md:text-base font-medium", prefersReducedMotion ? "" : "hover:opacity-70")}
+                            aria-label={ctaText}
+                        >
+                            <span className="auditCta14Text" data-text={ctaText}>
+                                {ctaText}
+                            </span>
+
+                            <span className="auditCta14Arrow" aria-hidden="true">
+                                <svg className="auditCta14ArrowLineSvg" viewBox="0 0 100 16" fill="none">
+                                    <line x1="0" y1="8" x2="100" y2="8" stroke="currentColor" strokeWidth="1" strokeLinecap="butt" vectorEffect="non-scaling-stroke" />
+                                </svg>
+
+                                <svg className="auditCta14ArrowHeadSvg" viewBox="0 0 18 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M0 3 L12 8 L0 13" vectorEffect="non-scaling-stroke" />
+                                </svg>
+                            </span>
+                        </Link>
+                    </div>
+
+                    <div className="auditHeroTiles mt-10 md:mt-12 grid grid-cols-12 gap-8 max-md:mt-9 max-md:gap-6">
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="soft">
+                                <Label>LEAK MAP</Label>
+                                <p className="text-[16px] md:text-[18px] font-medium text-ollin-black/85 mb-4 max-md:mb-3">
+                                    See where money escapes.
+                                </p>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={["Acquisition, conversion, and retention leaks.", "Fix the bottleneck—not the symptom."]}
+                                    itemsTablet={["Find the bottleneck.", "Fix the right thing first."]}
+                                    itemsMobile={["Find the bottleneck.", "Fix the right thing first."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="soft">
+                                <Label>ORDER OF OPS</Label>
+                                <p className="text-[16px] md:text-[18px] font-medium text-ollin-black/85 mb-4 max-md:mb-3">
+                                    Do the right fixes first.
+                                </p>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={["Stop spending while the pipeline leaks.", "Sequence > effort (it compounds)."]}
+                                    itemsTablet={["Stop waste first.", "Sequence compounds."]}
+                                    itemsMobile={["Stop waste first.", "Sequence compounds."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="soft">
+                                <Label>FASTEST WINS</Label>
+                                <p className="text-[16px] md:text-[18px] font-medium text-ollin-black/85 mb-4 max-md:mb-3">
+                                    Get traction without a rebuild.
+                                </p>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={["Highest-impact changes, lowest disruption.", "Clear next steps your team can run."]}
+                                    itemsTablet={["Fast wins, low disruption.", "Clear next steps."]}
+                                    itemsMobile={["Fast wins, low disruption.", "Clear next steps."]}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="auditSafeX w-full max-w-[1500px] mx-auto px-[5vw] pb-20 md:pb-28 space-y-16 md:space-y-20">
+
+                <div className="grid grid-cols-12 gap-8 items-start max-md:gap-10">
+                    <div id="review" className="col-span-12 md:col-span-6 scroll-mt-28">
+                        <SectionTitle
+                            kicker="Diagnosis"
+                            title="What we review"
+                            subtitle="We trace the full lead path—from the click to the booked job—so you can see exactly where revenue is leaking."
+                            subtitleMobile="We trace the lead path end-to-end, and spot where it\u2019s leaking."
+                        />
+
+                        <div className="mt-10 space-y-8 max-md:mt-8 max-md:space-y-6">
+                            <Card tone="glass">
+                                <Label>LEAD PATH &amp; FOLLOW-UP SPEED</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Missed calls, slow replies, and \u201cdead leads\u201d patterns.",
+                                    ]}
+                                    itemsTablet={["Where leads go (calls/forms/DMs).", "Response speed + handoffs."]}
+                                    itemsMobile={["Where leads go (calls/forms/DMs).", "Response speed + handoffs."]}
+                                />
+                            </Card>
+
+                            <Card tone="mid">
+                                <Label>TRACKING &amp; ATTRIBUTION</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Whether decisions are being made blind.",
+                                    ]}
+                                    itemsTablet={["What\u2019s visible vs invisible.", "Source truth (Ads/Maps/Organic)."]}
+                                    itemsMobile={["What\u2019s visible vs invisible.", "Source truth (Ads/Maps/Organic)."]}
+                                />
+                            </Card>
+
+                            <Card tone="soft">
+                                <Label>WEBSITE &amp; OFFER CLARITY</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Message match (does the page match what people searched?).",
+                                        "CTA clarity (what to do next, and how easy it is).",
+                                    ]}
+                                    itemsTablet={["Does the page match intent?", "Friction + trust blockers."]}
+                                    itemsMobile={["Does the page match intent?", "Friction + trust blockers."]}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+
+                    <div id="deliver" className="col-span-12 md:col-span-6 scroll-mt-28">
+                        <SectionTitle
+                            kicker="Output"
+                            title="What you get"
+                            subtitle="Not a long report. A clear plan in the right order—so you can fix what matters without wasting time or spend."
+                            subtitleMobile="A short, prioritized plan your team can actually execute."
+                        />
+
+                        <div className="mt-10 space-y-8 max-md:mt-8 max-md:space-y-6">
+                            <Card tone="glass">
+                                <Label>A PRIORITIZED ACTION PLAN</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Short list your team can execute without chaos.",
+                                    ]}
+                                    itemsTablet={["Highest-impact fixes first.", "Clear next steps."]}
+                                    itemsMobile={["Highest-impact fixes first.", "Clear next steps."]}
+                                />
+                            </Card>
+
+                            <Card tone="mid">
+                                <Label>THE LEAK MAP</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "A simple view of where revenue escapes across the pipeline.",
+                                        "How changes compound when done in order.",
+                                    ]}
+                                    itemsTablet={["Where revenue escapes.", "Fix now vs later."]}
+                                    itemsMobile={["Where revenue escapes.", "Fix now vs later."]}
+                                />
+                            </Card>
+
+                            <Card tone="soft">
+                                <Label>IMPLEMENTATION OPTIONS</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Execute with your team, with us, or mix both.",
+                                        "If you want help, we can scope the smallest sprint that moves results.",
+                                    ]}
+                                    itemsTablet={["DIY, Done-with-you, or Done-for-you.", "No rebuild required."]}
+                                    itemsMobile={["DIY, Done-with-you, or Done-for-you.", "No rebuild required."]}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+
+                <Divider />
+
+                <div id="leakmap" className="scroll-mt-28">
+                    <SectionTitle
+                        kicker="Clarity"
+                        title="Leak map"
+                        subtitle="We break leaks into three buckets so you stop guessing—and stop fixing the wrong thing."
+                        subtitleMobile="Three leak buckets. No guessing."
+                    />
+
+                    <div className="mt-10 grid grid-cols-12 gap-8 max-md:mt-8 max-md:gap-6">
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="glass">
+                                <Label>ACQUISITION LEAKS</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Ads/Maps sending clicks that can\u2019t convert.",
+                                        "Low trust at first glance (profile/site mismatch).",
+                                    ]}
+                                    itemsTablet={["Wrong traffic (intent/area/service).", "Low trust at first glance."]}
+                                    itemsMobile={["Wrong traffic (intent/area/service).", "Low trust at first glance."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="mid">
+                                <Label>CONVERSION LEAKS</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Forms/calls not reaching you or not being tracked.",
+                                        "Friction that kills leads quietly (slow pages, confusion).",
+                                    ]}
+                                    itemsTablet={["Unclear offer + CTA.", "Lost calls/forms or no tracking."]}
+                                    itemsMobile={["Unclear offer + CTA.", "Lost calls/forms or no tracking."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="soft">
+                                <Label>RETENTION LEAKS</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "No review velocity / reputation protection.",
+                                        "No reactivation (past customers go cold).",
+                                    ]}
+                                    itemsTablet={["Slow follow-up.", "No reviews / reactivation."]}
+                                    itemsMobile={["Slow follow-up.", "No reviews / reactivation."]}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+
+                <Divider />
+
+                <div id="options" className="scroll-mt-28">
+                    <SectionTitle
+                        kicker="Execution"
+                        title="Implementation options"
+                        subtitle="You can move fast without overcommitting. We help you choose the smallest option that produces momentum."
+                        subtitleMobile="Pick the smallest option that creates momentum."
+                    />
+
+                    <div className="mt-10 grid grid-cols-12 gap-8 max-md:mt-8 max-md:gap-6">
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="glass">
+                                <Label>DIY</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "We provide the plan + priorities + guardrails.",
+                                        "Best if you already have internal capacity.",
+                                    ]}
+                                    itemsTablet={["You execute.", "We provide the priorities."]}
+                                    itemsMobile={["You execute.", "We provide the priorities."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="mid">
+                                <Label>DONE-WITH-YOU</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "We implement the highest-impact fixes together.",
+                                        "Small sprint scope (no \u201cforever project\u201d).",
+                                    ]}
+                                    itemsTablet={["Implement together.", "Fast + accountable."]}
+                                    itemsMobile={["Implement together.", "Fast + accountable."]}
+                                />
+                            </Card>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                            <Card tone="soft">
+                                <Label>DONE-FOR-YOU</Label>
+                                <BulletList
+                                    reducedMotion={prefersReducedMotion}
+                                    items={[
+                                        "Best when you want leverage and speed.",
+                                        "We keep scope tight and results-first.",
+                                    ]}
+                                    itemsTablet={["We implement end-to-end.", "Tight scope, results first."]}
+                                    itemsMobile={["We implement end-to-end.", "Tight scope, results first."]}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 max-md:mt-7">
+                        <Card tone="soft">
+                            <Label>WHAT THIS IS NOT</Label>
+                            <BulletList
+                                reducedMotion={prefersReducedMotion}
+                                items={[
+                                    "Not a generic audit that ends with \u201cdo better marketing.\u201d",
+                                    "Not a forced rebuild of your website/brand.",
+                                    "Not a pile of metrics with no action attached.",
+                                ]}
+                                itemsTablet={["Not generic advice.", "Not a forced rebuild."]}
+                                itemsMobile={["Not generic advice.", "Not a forced rebuild."]}
+                                collapsibleMobile={false}
+                            />
+                        </Card>
+                    </div>
+                </div>
+
+                <div className="pt-4">
+                    <div className="rounded-none border border-black/10 bg-white/30 p-7 sm:p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <p className="text-[11px] md:text-[12px] tracking-[0.28em] uppercase text-ollin-black/45 mb-3">
+                                NEXT STEP
+                            </p>
+
+                            <p className="hidden md:block text-[18px] md:text-[22px] font-medium text-ollin-black/85">
+                                Start with the 360° Revenue Leak Audit.
+                            </p>
+
+                            <p className="md:hidden text-[18px] font-medium text-ollin-black/85 max-w-[28ch] leading-snug">
+                                Start with the Revenue Leak Audit.
+                            </p>
+
+                            <p className="hidden md:block mt-2 text-[14px] md:text-[15px] leading-relaxed text-ollin-black/65 max-w-[70ch]">
+                                Tell us your trade + service area and we&apos;ll map the fastest order of fixes to get you more booked calls
+                                without wasting spend.
+                            </p>
+
+                            <p className="md:hidden mt-2 text-[14px] leading-relaxed text-ollin-black/65 max-w-[46ch]">
+                                Tell us your trade + service area. We&apos;ll map the fastest fixes.
+                            </p>
+                        </div>
+
+                        <Link
+                            href="/contact"
+                            className="inline-flex items-center justify-center bg-ollin-black text-white text-[13px] md:text-[14px] font-medium tracking-wide px-6 py-3 rounded-[14px] hover:translate-y-[-1px] hover:shadow-lg transition-all w-full sm:w-auto"
+                        >
+                            Get the Audit
+                        </Link>
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+}

@@ -1,0 +1,35 @@
+"use client";
+
+import { PALETTE } from "@/lib/constants/packages";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+
+type Props = {
+  onBuildYourOwnPlan: () => void;
+};
+
+export default function CustomPlanCTASection({ onBuildYourOwnPlan }: Props) {
+  return (
+    <div className="mt-16">
+      <div>
+        <h2 className="font-[Montserrat] font-semibold text-3xl">
+          Need something custom?
+        </h2>
+        <p
+          className="mt-2 max-w-2xl leading-relaxed"
+          style={{ color: PALETTE.muted }}
+        >
+          Build your own plan from the pieces you actually need — then
+          we&apos;ll scope it cleanly.
+        </p>
+
+        <div className="mt-6">
+          <SecondaryButton
+            onClick={onBuildYourOwnPlan}
+            label="Build your own plan"
+            dataText="BUILD YOUR OWN PLAN"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
